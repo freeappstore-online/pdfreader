@@ -1,15 +1,21 @@
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Shell } from './components/Shell.tsx'
 import PdfViewer from './components/PdfViewer'
 import History from './components/History'
 import { savePdf, getPdf, touchPdf } from './lib/db'
+import { loadPrefs, savePrefs } from './lib/prefs'
 
 export default function App() {
   const [pdfData, setPdfData] = useState<ArrayBuffer | null>(null)
   const [pdfName, setPdfName] = useState('')
-  const [invert, setInvert] = useState(true)
+  const [prefs, setPrefs] = useState(loadPrefs)
   const [refreshKey, setRefreshKey] = useState(0)
   const fileRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => { savePrefs(prefs) }, [prefs])
+
+  const setInvert = (v: boolean) => setPrefs(p => ({ ...p, invert: v }))
+  const setScale = (s: number) => setPrefs(p => ({ ...p, scale: s }))
 
   const openFile = useCallback(async (file: File) => {
     const buf = await file.arrayBuffer()
@@ -48,8 +54,10 @@ export default function App() {
     if (file?.type === 'application/pdf') openFile(file)
   }, [openFile])
 
+  const reading = !!pdfData
+
   return (
-    <Shell>
+    <Shell hideChrome={reading}>
       <input ref={fileRef} type="file" accept=".pdf,application/pdf" onChange={handleFileChange} className="hidden" />
 
       <div
@@ -57,9 +65,8 @@ export default function App() {
         onDragOver={e => e.preventDefault()}
         onDrop={handleDrop}
       >
-        {pdfData ? (
+        {reading ? (
           <>
-            {/* Reader header */}
             <div className="flex items-center gap-3">
               <button
                 onClick={goHome}
@@ -69,17 +76,17 @@ export default function App() {
               </button>
               <span className="min-w-0 flex-1 truncate text-sm font-medium text-[var(--ink)]">{pdfName}</span>
               <button
-                onClick={() => setInvert(v => !v)}
+                onClick={() => setInvert(!prefs.invert)}
                 className={`rounded-lg px-3 py-1.5 text-sm font-medium transition ${
-                  invert
+                  prefs.invert
                     ? 'bg-[var(--accent)] text-white'
                     : 'text-[var(--ink)] hover:bg-[var(--glass-hover)]'
                 }`}
               >
-                {invert ? 'Dark Mode' : 'Light Mode'}
+                {prefs.invert ? 'Dark Mode' : 'Light Mode'}
               </button>
             </div>
-            <PdfViewer data={pdfData} invert={invert} />
+            <PdfViewer data={pdfData} invert={prefs.invert} scale={prefs.scale} onScaleChange={setScale} />
           </>
         ) : (
           <History onOpen={openFromHistory} onImport={triggerImport} refreshKey={refreshKey} />
