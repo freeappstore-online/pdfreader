@@ -1,0 +1,6 @@
+{
+  "appId": "pdfreader",
+  "applicationRoot": "web",
+  "outputPath": "web/dist",
+  "buildCommand": "pnpm build"
+}
