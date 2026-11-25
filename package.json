@@ -1,10 +1,19 @@
 {
   "name": "pdfreader",
   "private": true,
-  "packageManager": "pnpm@9.15.4",
-  "engines": { "node": ">=22" },
-  "pnpm": { "onlyBuiltDependencies": ["esbuild"] },
-  "repository": { "type": "git", "url": "git+https://github.com/freeappstore-online/pdfreader.git" },
+  "packageManager": "pnpm@10.30.3",
+  "engines": {
+    "node": ">=22"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/freeappstore-online/pdfreader.git"
+  },
   "scripts": {
     "dev": "pnpm --filter @pdfreader/web dev",
     "build": "pnpm --filter @pdfreader/web build",
